@@ -1,0 +1,544 @@
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    Name VARCHAR(255),
+    DepartmentID INT,
+    Salary DECIMAL(10, 2),
+    JoinDate DATE
+);
+
+CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY,
+    DepartmentName VARCHAR(255),
+    ManagerID INT,
+    Location VARCHAR(255)
+);
+ALTER TABLE Departments
+ADD CONSTRAINT fk_managerid FOREIGN KEY (ManagerID) REFERENCES Employees(EmployeeID);
+
+ALTER TABLE Employees
+ADD CONSTRAINT fk_departmentid FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID);
+
+CREATE TABLE EmpProjects (
+    EmpProjectID INT PRIMARY KEY,
+    EmployeeID INT,
+    ProjectID INT,
+    Role VARCHAR(255),
+    HoursWorked INT,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID)
+);
+
+CREATE TABLE Projects (
+    ProjectID INT PRIMARY KEY,
+    ProjectName VARCHAR(255),
+    Budget DECIMAL(10, 2),
+    DepartmentID INT,
+    StartDate DATE,
+    EndDate DATE,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+
+
+SELECT * FROM advanceddatabase.empprojects;
+SELECT Name FROM Employees;
+
+SELECT COUNT(*) AS TotalEmployees FROM Employees;
+
+SELECT * FROM Employees ORDER BY Salary DESC LIMIT 1;
+
+SELECT * FROM Employees WHERE JoinDate > '2023-01-01';
+
+SELECT AVG(Salary) AS AverageSalary FROM Employees;
+
+SELECT Employees.Name, Departments.DepartmentName
+FROM Employees
+INNER JOIN Departments ON Employees.DepartmentID = Departments.DepartmentID;
+
+SELECT Projects.ProjectName, Employees.Name
+FROM Projects
+INNER JOIN EmpProjects ON Projects.ProjectID = EmpProjects.ProjectID
+INNER JOIN Employees ON EmpProjects.EmployeeID = Employees.EmployeeID;
+
+
+SELECT Employees.Name
+FROM Employees
+INNER JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+INNER JOIN Projects ON EmpProjects.ProjectID = Projects.ProjectID
+WHERE Projects.ProjectName = 'Communication Skills Training';
+
+SELECT Departments.DepartmentName, SUM(Projects.Budget) AS TotalBudget
+FROM Departments
+LEFT JOIN Projects ON Departments.DepartmentID = Projects.DepartmentID
+GROUP BY Departments.DepartmentName;
+
+SELECT Employees.Name
+FROM Employees
+LEFT JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+WHERE EmpProjects.EmployeeID IS NULL;
+
+SELECT Employees.Name, Departments.DepartmentName, Projects.ProjectName
+FROM Employees
+INNER JOIN Departments ON Employees.DepartmentID = Departments.DepartmentID
+INNER JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+INNER JOIN Projects ON EmpProjects.ProjectID = Projects.ProjectID;
+
+
+SELECT Employees.Name, Departments.DepartmentName, Projects.ProjectName
+FROM Employees
+INNER JOIN Departments ON Employees.DepartmentID = Departments.DepartmentID
+INNER JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+INNER JOIN Projects ON EmpProjects.ProjectID = Projects.ProjectID;
+
+
+SELECT Projects.ProjectName, Departments.DepartmentName AS ManagingDepartment
+FROM Projects
+INNER JOIN Departments ON Projects.DepartmentID = Departments.DepartmentID;
+
+select * from departments;
+SELECT Employees.Name
+FROM Employees
+INNER JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+INNER JOIN Projects ON EmpProjects.ProjectID = Projects.ProjectID
+WHERE Projects.Budget = (
+    SELECT MAX(Budget) FROM Projects
+);
+
+SELECT AVG(Salary) AS AverageSalary
+FROM Employees
+WHERE DepartmentID IN (
+    SELECT DepartmentID
+    FROM Employees
+    GROUP BY DepartmentID
+    HAVING COUNT(*) > 10
+);
+
+SELECT DISTINCT Employees.Name
+FROM Employees
+INNER JOIN EmpProjects ON Employees.EmployeeID = EmpProjects.EmployeeID
+INNER JOIN Projects ON EmpProjects.ProjectID = Projects.ProjectID
+INNER JOIN Departments ON Projects.DepartmentID = Departments.DepartmentID
+WHERE Departments.DepartmentName = 'IT';
+
+
+-- --more complex sql queries
+SELECT Name, Salary
+FROM Employees
+WHERE Salary > (SELECT AVG(Salary) FROM Employees);
+
+
+SELECT DepartmentID, COUNT(*) AS EmployeeCount
+FROM Employees
+GROUP BY DepartmentID
+ORDER BY EmployeeCount DESC
+LIMIT 1;
+
+SELECT *
+FROM Employees
+ORDER BY JoinDate
+LIMIT 1;
+
+SELECT *
+FROM Employees
+WHERE Name LIKE 'A%';
+		
+SELECT DepartmentID, SUM(Salary) AS TotalSalaryExpense
+FROM Employees
+GROUP BY DepartmentID;
+
+select * from employees;
+select * from departments;
+
+-- SELECT e.Name AS EmployeeName, m.Name AS ManagerName
+-- FROM Employees e
+-- LEFT JOIN Employees m ON e.ManagerID = m.EmployeeID;
+-- --answer milena yesko two table join wala 
+SELECT e.Name AS EmployeeName, m.Name AS ManagerName
+FROM Employees e
+LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
+LEFT JOIN Employees m ON d.ManagerID = m.EmployeeID; 
+ 
+ SELECT p.ProjectName, d.DepartmentName, e.Name AS EmployeeName
+FROM Projects p
+INNER JOIN Departments d ON p.DepartmentID = d.DepartmentID
+LEFT JOIN EmpProjects ep ON p.ProjectID = ep.ProjectID
+LEFT JOIN Employees e ON ep.EmployeeID = e.EmployeeID;
+ 
+SELECT DepartmentID
+FROM Employees
+GROUP BY DepartmentID
+HAVING AVG(Salary) > 50000;
+
+SELECT ep.EmployeeID, e.Name AS EmployeeName, SUM(ep.HoursWorked) AS TotalHoursWorked
+FROM EmpProjects ep
+INNER JOIN Employees e ON ep.EmployeeID = e.EmployeeID
+GROUP BY ep.EmployeeID, e.Name;
+
+
+SELECT e.Name
+FROM Employees e
+INNER JOIN EmpProjects ep ON e.EmployeeID = ep.EmployeeID
+GROUP BY e.EmployeeID
+HAVING COUNT(ep.ProjectID) > 1;
+
+SELECT 
+    e.Name AS EmployeeName,
+    d.ManagerID AS ManagerID,
+    d.DepartmentName,
+    p.ProjectName
+FROM employees e
+LEFT JOIN departments d ON e.DepartmentID = d.DepartmentID
+JOIN empprojects ep ON e.EmployeeID = ep.EmployeeID
+JOIN projects p ON ep.ProjectID = p.ProjectID;
+
+
+SELECT e.Name AS EmployeeName,m.Name AS ManagerName, d.DepartmentName,p.ProjectName
+FROM employees e
+LEFT JOIN employees m ON e.ManagerID = m.EmployeeID
+JOIN departments d ON e.DepartmentID = d.DepartmentID
+JOIN empprojects ep ON e.EmployeeID = ep.EmployeeID
+JOIN projects p ON ep.ProjectID = p.ProjectID;
+
+SELECT 
+    p.ProjectName,
+    p.StartDate,
+    p.EndDate,
+    COUNT(ep.EmployeeID) AS TotalEmployeesAssigned
+FROM 
+    Projects p
+LEFT JOIN 
+    EmpProjects ep ON p.ProjectID = ep.ProjectID
+GROUP BY 
+    p.ProjectName, p.StartDate, p.EndDate;
+        
+SELECT e.EmployeeID, e.Name
+FROM Employees e
+INNER JOIN EmpProjects ep ON e.EmployeeID = ep.EmployeeID
+INNER JOIN Projects p ON ep.ProjectID = p.ProjectID
+INNER JOIN Departments d ON p.DepartmentID = d.DepartmentID
+WHERE d.DepartmentName = 'HR'
+GROUP BY 
+    e.EmployeeID, e.Name
+HAVING COUNT(DISTINCT p.ProjectID) = (
+        SELECT 
+            COUNT(*) 
+        FROM 
+            Projects 
+        WHERE 
+            DepartmentID = (
+                SELECT 
+                    DepartmentID 
+                FROM 
+                    Departments 
+                WHERE 
+                    DepartmentName = 'HR'
+            )
+    );
+    
+SELECT 
+    e.Name AS EmployeeName
+FROM 
+    Employees e
+INNER JOIN 
+    Departments d ON e.DepartmentID = d.DepartmentID
+INNER JOIN (
+    SELECT 
+        DepartmentID, AVG(Salary) AS AvgSalary
+    FROM 
+        Employees
+    GROUP BY 
+        DepartmentID
+) AS dept_avg ON e.DepartmentID = dept_avg.DepartmentID
+WHERE 
+    e.Salary > dept_avg.AvgSalary;
+        
+SELECT 
+    DISTINCT e.Name AS EmployeeName
+FROM 
+    Employees e
+INNER JOIN 
+    EmpProjects ep ON e.EmployeeID = ep.EmployeeID
+INNER JOIN 
+    Projects p ON ep.ProjectID = p.ProjectID
+INNER JOIN 
+    Departments d ON p.DepartmentID = d.DepartmentID
+WHERE 
+    d.Location = ' Block A';
+
+-- --4.1 (view ko sql query)
+-- 1
+-- Create a view that lists the names of employees along with their salaries and
+-- department names.
+create view emp_sal_dept as
+select e.Name as EmployeeName, e.salary as EmployeeSalary , d.DepartmentName as Department_Name
+From employeeS AS
+e left join departments as d
+on e.DepartmentID = d.DepartmentID;
+select * from emp_sal_dept;
+
+-- 2. Create a view that displays the total budget allocated for each project along with the project name.
+
+create view budget_proj as
+select p.ProjectID, p.ProjectName, SUM(p.Budget) as TotalBudget
+From projects p
+join empprojects ep on p.ProjectID= ep.ProjectID
+GROUP BY p.ProjectID, p.ProjectName;
+select * from budget_proj;
+
+-- 3)
+
+create view emp_proj_role as
+select e.Name as EmployeeName,
+p.ProjectName, ep.Role
+from employees e
+join empprojects ep on e.EmployeeID = ep.EmployeeId
+join projects p on ep.ProjectID = p.ProjectID;
+select * from emp_proj_role;
+
+-- 4.)Create a view that displays the names of employees along with the
+-- department names of their managers.
+CREATE VIEW emp_dept_mang AS
+SELECT e.Name AS EmployeeName,m.Name AS ManagerName, d.DepartmentName AS ManagerDepartment
+FROM employees e
+LEFT JOIN employees m ON e.DepartmentID = m.DepartmentID
+JOIN departments d ON m.DepartmentID = d.DepartmentID;
+select * from emp_dept_mang;
+
+-- index
+-- 1.Create an index on the Salary column of the Employees table to improve performance for salary-based queries.
+
+create index idx_salary on employees(salary);
+-- 2.Create a composite index on the DepartmentID and StartDate columns of the Projects table to optimize queries 
+-- involving department-based projects and start dates
+CREATE INDEX idx_salary_department ON projects (StartDate, DepartmentID);
+
+-- 3. Remove the index created on the Salary column of the Employees table.
+Drop index idx_salary on employees;
+-- 4. Remove the composite index created on the DepartmentID and StartDate
+-- columns of the Projects table.
+drop index idx_salary_department on projects;
+
+-- stored proceudrs
+
+-- 1.Create a stored procedure to retrieve the names and salaries of employees who joined after a specified date.
+DELIMITER //
+
+CREATE PROCEDURE EmployeeJoinDate(IN joinDate DATE)
+BEGIN
+    SELECT Name, Salary
+    FROM Employees
+    WHERE JoinDate > joinDate;
+END //
+
+DELIMITER ;
+execute EmployeeJoinDate;
+CALL EmployeeJoinDate('2023-11-15');
+DROP PROCEDURE IF EXISTS EmployeeJoinDate;
+
+SHOW CREATE PROCEDURE EmployeeJoinDate;
+
+-- 2.Create a stored procedure to update the salary of an employee based on their ID.
+DELIMITER //
+
+CREATE PROCEDURE UpdateEmployeeSal(IN EmployeeIDParam INT, IN NewSalary DECIMAL(10, 2))
+BEGIN
+    UPDATE Employees
+    SET Salary = NewSalary
+    WHERE EmployeeID = EmployeeIDParam;
+END //
+
+DELIMITER ;
+
+call UpdateEmployeeSal(2, 90000);
+select * from employees;
+
+DROP PROCEDURE IF EXISTS UpdateEmployeeSal;
+
+
+-- 3.Create a stored procedure to insert a new project record into the Projects table.
+	DELIMITER //
+
+CREATE PROCEDURE InsertProject(IN p_ProjectID INT,
+    IN p_ProjectName VARCHAR(255),
+    IN p_Budget DECIMAL(10, 2),
+    IN p_DepartmentID INT,
+    IN p_StartDate DATE,
+    IN p_EndDate DATE
+)
+BEGIN
+    INSERT INTO projects (ProjectID, ProjectName, Budget, DepartmentID, StartDate, EndDate)
+    VALUES (p_ProjectID, p_ProjectName, p_Budget, p_DepartmentID, p_StartDate, p_EndDate);
+END //
+
+DELIMITER ;
+
+CALL InsertProject(8, 'auditing skills', 10000, 1, '2024-01-01', '2024-02-29');
+select * from projects;
+DROP PROCEDURE IF EXISTS InsertProject;
+
+-- 4.Create a stored procedure to delete an employee record based on their ID.
+DELIMITER //
+
+CREATE PROCEDURE DeleteEmployee(IN EmployeeID INT)
+BEGIN
+    DELETE FROM Employees WHERE EmployeeID = EmployeeID;
+END //
+
+DELIMITER ;
+CALL DeleteEmployee(2);
+
+
+#6 Triggers
+
+-- 1.Create a trigger to automatically update the LastModifiedDate column of the Employees table whenever a row is updated. (Add column if necessary)
+ALTER TABLE employees
+ADD COLUMN LastModifiedDate DATETIME;
+
+DELIMITER //
+
+CREATE TRIGGER ModifiedDate
+BEFORE UPDATE ON employees
+FOR EACH ROW
+BEGIN
+    SET NEW.LastModifiedDate = NOW();
+END //
+
+DELIMITER ;
+UPDATE employees SET Salary = 80000.00 WHERE EmployeeID = 3;
+
+
+-- 2.Create a trigger to log the details of inserted projects into an audit table whenever a new project is inserted into the Projects table. (Create table if necessary)
+
+CREATE TABLE IF NOT EXISTS ProjectAudit (
+    AuditID INT AUTO_INCREMENT PRIMARY KEY,
+    ProjectID INT,
+    ProjectName VARCHAR(255),
+    StartDate DATE,
+    EndDate DATE,
+    Budget DECIMAL(15, 2),
+    InsertedOn DATETIME
+);
+
+-- Step 4: Create the trigger to log new projects into ProjectAudit
+DELIMITER //
+
+CREATE TRIGGER LogNewProject
+AFTER INSERT ON projects
+FOR EACH ROW
+BEGIN
+    INSERT INTO ProjectAudit (ProjectID, ProjectName, StartDate, EndDate, Budget, InsertedOn)
+    VALUES (NEW.ProjectID, NEW.ProjectName, NEW.StartDate, NEW.EndDate, NEW.Budget, NOW());
+END //
+
+DELIMITER ;
+select * from projectaudit;
+SELECT * FROM Departments;
+
+
+INSERT INTO projects (ProjectID, ProjectName, Budget,DepartmentID,StartDate, EndDate)
+VALUES (4, 'financial budget analysis','50000',1,'2023-09-01', '2024-12-31');
+
+
+-- 3.Create a trigger to enforce a constraint where the budget of a project cannot exceed a certain threshold (e.g., $1,000,000).
+-- ---- Create the trigger to enforce a budget constraint
+DELIMITER //
+
+CREATE TRIGGER EnforceBdgtConstraint
+BEFORE INSERT ON Projects
+FOR EACH ROW
+BEGIN
+    IF NEW.Budget > 50000 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Budget exceeds the allowed threshold of 50000';
+    END IF;
+END //
+
+DELIMITER ;
+
+
+-- Create the trigger to enforce budget constraint before update
+DELIMITER //
+
+CREATE TRIGGER EnforceBdgtConstraintBefore
+BEFORE UPDATE ON Projects
+FOR EACH ROW
+BEGIN
+    IF NEW.Budget > 50000 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Budget exceeds the allowed threshold of 50000';
+    END IF;
+END //
+
+DELIMITER ;
+select * from departments;
+-- Test inserting a project with a budget within the limit (should succeed)
+INSERT INTO Projects (ProjectID, ProjectName, Budget, DepartmentID, StartDate, EndDate)
+VALUES (5, 'Internship plan', 500000, 3, '2024-01-01', '2024-4-31');
+
+-- Test inserting a project with a budget exceeding the limit (should fail)
+INSERT INTO Projects (ProjectID, ProjectName, Budget, DepartmentID, StartDate, EndDate)
+VALUES (6, 'HR intern', 40000, 2, '2024-01-01', '2024-12-31');
+
+select * from projects;
+
+
+-- 4.Create a trigger to delete associated records from the Emp_Projects table when an employee is deleted from the Employees table.
+DELIMITER //
+
+CREATE TRIGGER DeleteEmpProjects
+AFTER DELETE ON Employees
+FOR EACH ROW
+BEGIN
+    DELETE FROM Emp_Projects WHERE EmployeeID = OLD.EmployeeID;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER BeforeEmployeeDelete
+BEFORE DELETE ON Employees
+FOR EACH ROW
+BEGIN
+    -- Set ManagerID to NULL for departments where the manager is being deleted
+    UPDATE Departments SET ManagerID = NULL WHERE ManagerID = OLD.EmployeeID;
+
+    -- Alternatively, delete the department if needed
+    -- DELETE FROM Departments WHERE ManagerID = OLD.EmployeeID;
+END //
+
+DELIMITER ;
+
+
+-- Check data in Employees table
+SELECT * FROM Employees;
+
+-- Check data in Emp_Projects table
+SELECT * FROM empprojects;
+
+-- Delete an employee from Employees table
+-- Drop the existing foreign key constraint
+-- ALTER TABLE Emp_Projects DROP FOREIGN KEY empprojects_ibfk_1;
+
+-- -- Add a new foreign key constraint with ON DELETE CASCADE
+-- ALTER TABLE Emp_Projects
+-- ADD CONSTRAINT empprojects_ibfk_1 FOREIGN KEY (EmployeeID)
+-- REFERENCES Employees(EmployeeID) ON DELETE CASCADE;
+
+
+DELETE FROM employees WHERE EmployeeID = 3;
+DELIMITER //
+
+CREATE TRIGGER trg_DeleteEmpProjects
+AFTER DELETE ON Employees
+FOR EACH ROW
+BEGIN
+    DELETE FROM Emp_Projects
+    WHERE Emp_Projects.EmployeeID = OLD.EmployeeID;
+END;
+ 
+DELIMITER ;
+
+select * from empprojects;
+
+DROP TRIGGER IF EXISTS BeforeEmployeeDelete;
